@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [loginFormDetails, setLoginFormDetails] = useState({
     email: "",
     password: "",
+    role: "Seller"
   });
 
   const [errorMessages, setErrorMessages] = useState({});

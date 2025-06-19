@@ -41,7 +41,7 @@ export const loginFormData = createAsyncThunk(
     } else {
       payload = {
         ...payload,
-        // "fcm_token": fcmToken
+        "fcm_token": fcmToken
       };
     }
     const response = await LoginService(payload)

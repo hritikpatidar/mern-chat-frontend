@@ -7,7 +7,7 @@ export const PublicRoute = () => {
 
   return (
     <>
-      {(!adminLogin) ? (
+      {(!adminLogin) ? ( 
         <>
           <Outlet />
         </>

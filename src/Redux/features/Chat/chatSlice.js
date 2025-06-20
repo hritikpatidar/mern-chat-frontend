@@ -5,10 +5,11 @@ import { createConversationService } from "../../../Services/ChatServices/chatSe
 // Initial state
 const initialState = {
   userList: [],//userList ke liye
-  selectChatUSer: null, // selectChatUSer ke liye
-  conversationList: [], // conversationList ke liye
-  selectedChatType: undefined, // selectedChatType ke liye (individual/group)
-  selectedChatMessages: [],
+  singleConversationList: [], // conversationList ke liye
+  groupConversationList: [], // conversationList ke liye
+  selectedChatType: "single", // selectedChatType ke liye (individual/group)
+  selectedUser: null, // selectChatUSer ke liye
+  ChatMessages: [],
   onlineStatus: [],
   isUploading: false,
   isDownloading: false,
@@ -31,20 +32,20 @@ export const getUserList = createAsyncThunk(
   }
 );
 
-export const createConversation = createAsyncThunk(
-  "chat/createConversation",
-  async (payload) => {
-    const response = await createConversationService(payload);
-    return response.data || {};
-  }
-);
-export const getConversation = createAsyncThunk(
-  "chat/getConversation",
-  async () => {
-    const response = await getConversationService();
-    return response.data || [];
-  }
-);
+// export const createConversation = createAsyncThunk(
+//   "chat/createConversation",
+//   async (payload) => {
+//     const response = await createConversationService(payload);
+//     return response.data || {};
+//   }
+// );
+// export const getConversation = createAsyncThunk(
+//   "chat/getConversation",
+//   async () => {
+//     const response = await getConversationService();
+//     return response.data || [];
+//   }
+// );
 
 
 
@@ -54,56 +55,51 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    setSelectChat: (state, action) => {
-      state.selectChatUSer = action.payload;
+    setSelectUser: (state, action) => {
+      state.selectedUser = action.payload;
     },
     setSelectedChatType: (state, action) => {
       state.selectedChatType = action.payload;
     },
-    setConversationList: (state, action) => {
-      state.conversationList = action.payload;
+    setSingleConversationList: (state, action) => {
+      state.singleConversationList = action.payload;
     },
-    setSelectedChatMessagesClear: (state, action) => {
-      state.selectedChatMessages = [...action.payload]
+    setGroupConversationList: (state, action) => {
+      state.groupConversationList = action.payload;
+    },
+    setChatMessagesClear: (state, action) => {
+      state.ChatMessages = [...action.payload]
     },
     setUpdateMessages: (state, action) => {
-      state.selectedChatMessages = action.payload;
+      state.ChatMessages = action.payload;
     },
     setSelectedChatMessages: (state, action) => {
-      state.selectedChatMessages = [...action.payload, ...state.selectedChatMessages];
+      state.ChatMessages = [...action.payload, ...state.ChatMessages];
     },
     setSelectedUpdateChatMessages: (state, action) => {
-      state.selectedChatMessages = [...state.selectedChatMessages, action.payload];
+      state.ChatMessages = [...state.ChatMessages, action.payload];
     },
-    // setupdateMessageValue: (state, action) => {
-    //   if (state.selectedChatMessages.length > 0) {
-    //     state.selectedChatMessages[state.selectedChatMessages.length - 1] = action.payload
-    //   }
-    // },
     setupdateMessageValue: (state, action) => {
       if (!Array.isArray(action.payload)) {
         action.payload = [action.payload]; // 🛠 Single message ko array me convert kar diya
       }
 
       action.payload.forEach((newMessage) => {
-        const index = state.selectedChatMessages.findIndex((msg) => msg.message_id === newMessage.message_id);
+        const index = state.ChatMessages.findIndex((msg) => msg.message_id === newMessage.message_id);
 
         if (index !== -1) {
-          // 🔄 Update existing message
-          state.selectedChatMessages[index] = { ...state.selectedChatMessages[index], ...newMessage };
-          // } else {
-          //   // ➕ Add new message if it doesn't exist
-          //   state.selectedChatMessages.push(newMessage);
+          state.ChatMessages[index] = { ...state.ChatMessages[index], ...newMessage };
         }
       });
     },
     setupdateOneMessage: (state, action) => {
       const { _id } = action.payload;
-      const message = state.selectedChatMessages.find(msg => msg._id === _id);
+      const message = state.ChatMessages.find(msg => msg._id === _id);
       if (message) {
         message.isDownload = true; // Directly update without reassigning array
       }
     },
+
     setIsUploading: (state, action) => {
       state.isUploading = action.payload;
     },
@@ -120,12 +116,12 @@ const chatSlice = createSlice({
       state.viewImages = action.payload
     },
     closeChat: (state) => {
-      state.selectChatUSer = {};
-      state.selectedChatType = undefined;
-      state.selectedChatMessages = [];
+      state.selectedUser = {};
+      state.selectedChatType = "single";
+      state.ChatMessages = [];
     },
     addMessage: (state, action) => {
-      state.selectedChatMessages.push(action.payload);
+      state.ChatMessages.push(action.payload);
     },
     onlineStatusData: (state, action) => {
       state.onlineStatus = action.payload;
@@ -149,10 +145,10 @@ const chatSlice = createSlice({
     clearChatState: (state, action) => {
       // state.userList = [];
       state.isUserDetails = false
-      state.selectChatUSer = null;
+      state.selectedUser = null;
       // state.conversationList = [];
-      state.selectedChatType = undefined;
-      state.selectedChatMessages = [];
+      state.selectedChatType = "single";
+      state.ChatMessages = [];
       state.filesList = []
       state.linksList = []
       // state.onlineStatus = [];
@@ -181,48 +177,20 @@ const chatSlice = createSlice({
         state.userList = [];
         state.error = action.error.message;
       })
-      //-----------------------------------------------------------
-      .addCase(createConversation.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createConversation.fulfilled, (state, action) => {
-        state.loading = false;
-        state.selectChatUSer = action.payload.data || {};
-        state.error = "";
-      })
-      .addCase(createConversation.rejected, (state, action) => {
-        state.loading = false;
-        state.selectChatUSer = {};
-        state.error = action.error.message;
-      })
-      //-----------------------------------------------------------
-      .addCase(getConversation.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getConversation.fulfilled, (state, action) => {
-        state.loading = false;
-        state.conversationList = action.payload.data || [];
-        state.error = "";
-      })
-      .addCase(getConversation.rejected, (state, action) => {
-        state.loading = false;
-        state.conversationList = [];
-        state.error = action.error.message;
-      })
+      
   },
 });
 
 // Export actions and reducer
 export const {
-  setSelectChat,
-  setConversationList,
+  setSelectUser,
   setSelectedChatType,
-  setSelectedChatMessages,
+  setSingleConversationList,
+  setGroupConversationList,
+  setChatMessagesClear,
   setUpdateMessages,
+  setSelectedChatMessages,
   setSelectedUpdateChatMessages,
-  setSelectedChatMessagesClear,
   setupdateMessageValue,
   setupdateOneMessage,
   setIsUploading,
@@ -238,7 +206,7 @@ export const {
   updateFilesList,
   setLinksList,
   updatelinksList,
-  clearChatState,
+  clearChatState
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

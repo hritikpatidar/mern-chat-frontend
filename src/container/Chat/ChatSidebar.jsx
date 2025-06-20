@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import for navigation
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { clearChatState } from "../../Redux/features/Chat/chatSlice";
+import { clearChatState, setSelectedChatType } from "../../Redux/features/Chat/chatSlice";
 import { useSocket } from "../../context/SocketContext";
 import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Search, Settings, SunMoon, User, X } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserServices";
+import dummyImage from "../../assets/dummyImage.png"
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const navigate = useNavigate();
@@ -18,7 +25,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   // const [isListLoading, setIsListLoading] = useState(false);
   // const userLists = useSelector((state) => state?.ChatDataSlice?.userList);
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
-  // const conversationList = useSelector((state) => state?.ChatDataSlice?.conversationList);
+  const { singleConversationList, groupConversationList, selectedChatType } = useSelector((state) => state?.ChatDataSlice);
   // const selectedUserDetails = useSelector((state) => state?.ChatDataSlice?.selectChatUSer);
   // const [searchValue, setSearchValue] = useState("")
   // const [searchConversationUSer, setSearchConversationUSer] = useState("")
@@ -29,7 +36,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
   //   return fullName.includes(search) || email.includes(search);
   // });
-  const [chatType, setChatType] = useState("single")
   const [isUserListOpen, setIsUserListOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -144,14 +150,14 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
         {/* Tabs: Group / Single */}
         <div className="flex mb-4 border border-gray-300 rounded-md overflow-hidden">
           <button
-            className={`flex-1 py-2 text-sm font-medium ${chatType === "single" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
-            onClick={() => setChatType("single")}
+            className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "single" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
+            onClick={() => dispatch(setSelectedChatType("single"))}
           >
             Single
           </button>
           <button
-            className={`flex-1 py-2 text-sm font-medium ${chatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
-            onClick={() => setChatType("group")}
+            className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
+            onClick={() => dispatch(setSelectedChatType("group"))}
           >
             Group
           </button>
@@ -159,30 +165,61 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
         {/* Recent Chats */}
         <ul className="space-y-2 overflow-y-auto flex-1">
-          {(chatType === "single" ? ["John Doe"] : ["College Friends"]).map((name, i) => (
-            <li
-              key={i}
-              className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
-            >
-              {/* Profile circle (initials) */}
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
-                {name
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .toUpperCase()}
-              </div>
+          {(selectedChatType === "single" ? singleConversationList : groupConversationList).map((cv, i) => {
+            let user = {}
+            if (selectedChatType === "single") {
+              const data = cv.members.find(item => item._id !== profileData?._id)
+              user.senderId = cv?.lastMessageDetails?.isSenderId
+              user.name = data?.name
+              user.profile = dummyImage
+              user.message = cv?.lastMessageDetails?.message
+              user.messageType = cv?.lastMessageDetails?.messageType
+              user.time = cv?.lastMessageDetails?.timestamp
+            } else {
+              user.senderId = cv?.lastMessageDetails?.isSenderId
+              user.name = cv.name
+              user.profile = dummyImage
+              user.message = cv?.lastMessageDetails?.message
+              user.messageType = cv?.lastMessageDetails?.messageType
+              user.time = cv?.lastMessageDetails?.timestamp
+            }
+            console.log("user", user)
+            return (
+              <li
+                key={i}
+                className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
+              >
+                {/* Profile circle (initials) */}
+                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
+                  {user.profile ? (
+                    <img src={user.profile} alt={"No Image"} className="w-12 h-12 rounded-full" />
+                  ) : user?.name?.split(" ")
+                    .map((word) => word[0])
+                    .join("")
+                    .toUpperCase()}
+                </div>
 
-              {/* Name and message */}
-              <div className="flex-1">
-                <p className="font-medium text-gray-800">{name}</p>
-                <p className="text-xs text-gray-600">This theme is awesome!</p>
-              </div>
+                {/* Name and message */}
+                <div className="flex-1">
+                  <p className="font-medium text-gray-800">{user.name}</p>
+                  {
+                    cv?.lastMessageDetails &&
+                      (user.senderId === profileData?._id) ? (
+                      user?.message ?
+                        <p className="text-xs text-gray-600">
+                          {`You : ${user?.message}`}
+                        </p>
+                        : <p className="text-xs text-gray-600">{user?.message}</p>
+                    ) : <p className="text-xs text-gray-600">Start Conversation</p>
 
-              {/* Time */}
-              <span className="text-xs text-gray-500">2:06 min</span>
-            </li>
-          ))}
+                  }
+                </div>
+
+                {/* Time */}
+                <span className="text-xs text-gray-500">{dayjs(user.time).format("hh:mm A")}</span>
+              </li>
+            )
+          })}
         </ul>
       </div>
 

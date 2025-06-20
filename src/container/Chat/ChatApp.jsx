@@ -1,11 +1,9 @@
 import EmojiPicker from 'emoji-picker-react';
-import { AlignJustify, Archive, Bell, ChevronDownIcon, Clock, EllipsisVertical, File, Image, LifeBuoy, LogOut, MessageSquarePlus, MessageSquareX, MoveLeft, Music, Paperclip, Phone, Search, Settings, Smile, SunMoon, Trash2, User, UserPlus, Video, VolumeX, X } from 'lucide-react';
+import { AlignJustify, Archive, EllipsisVertical, MessageSquareX, Paperclip, Phone, Trash2, User, Video, VolumeX, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
-import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from '../../Utils/browserServices';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { Menu, MenuButton, MenuItems } from '@headlessui/react'
 import { useSocket } from '../../context/SocketContext';
 import ChatSidebar from './ChatSidebar';
 
@@ -27,16 +25,16 @@ const ChatApp = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-  const [isUserListOpen, setIsUserListOpen] = useState(false);
-
+  const {  selectedChatType } = useSelector((state) => state?.ChatDataSlice);
+debugger
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim()) {
       let msgContent = {};
-      if (chatType === "single") {
+      if (selectedChatType === "single") {
         msgContent = {
           conversationId: "684fc66a067a4fc539d38684", //684fc66a067a4fc539d38684 
-          isSenderId: "681f41c31db558fb452cd754", // sender's user ID
+          isSenderId: "682476a5216d67de02b7ffbd", // sender's user ID
           isReceiverId: "68242db5216d67de02b7f9c0", //68242db5216d67de02b7f9c0 
           groupId: "", //68500e1faad63c8b915c5ecc 
           message: message,
@@ -44,10 +42,10 @@ const ChatApp = () => {
           messageType: "text", // "text" | "image" | "video" | "file"
           status: "sent",      // "sent" | "delivered" | "read"
         };
-      } else if (chatType === "group") {
+      } else if (selectedChatType === "group") {
         msgContent = {
           conversationId: "", //684fc66a067a4fc539d38684 
-          isSenderId: "681f41c31db558fb452cd754", // sender's user ID
+          isSenderId: "682476a5216d67de02b7ffbd", // sender's user ID
           isReceiverId: "", //68242db5216d67de02b7f9c0 
           groupId: "685290ffc60461b559661507", //68529121c60461b55966150a 
           message: message,
@@ -63,6 +61,7 @@ const ChatApp = () => {
   };
 
   // useEffect(() => {
+  //   debugger
   //   socket.current.emit("groupConversation", "681f41c31db558fb452cd754");
   //   socket.current.emit("conversation", "681f41c31db558fb452cd754");
   //   socket.current.on('receiveMessage', (msg) => {
@@ -71,6 +70,7 @@ const ChatApp = () => {
   //   });
 
   //   socket.current.on("groupConversationResults", (conversationList) => {
+  //     debugger
   //   });
 
   //   socket.current.on("conversationResults", (conversationList) => {
@@ -101,7 +101,7 @@ const ChatApp = () => {
     }
   };
 
-
+console.log("selectedChatType",selectedChatType)
 
   return (
     <div className="flex h-screen font-sans bg-gray-100 ">
@@ -110,7 +110,7 @@ const ChatApp = () => {
         <ChatSidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
 
       </>
-      {true ? (
+      {false ? (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-gray-200 px-6 py-10">
           <button
            onClick={() => setShowSidebar(true)}
@@ -151,16 +151,16 @@ const ChatApp = () => {
                   <AlignJustify />
                 </button>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-300 text-white font-bold text-lg border">
-                  {chatType
+                  {selectedChatType
                     ?.charAt(0)
                     ?.toUpperCase()}
                 </div>
                 <div>
                   <h2 className="text-md font-bold text-gray-800">
-                    {chatType.charAt(0).toUpperCase() + chatType.slice(1)}
+                    {selectedChatType?.charAt(0).toUpperCase() + selectedChatType?.slice(1)}
                   </h2>
                   <p className="text-sm text-green-600">
-                    {chatType === "single" ? "active now" : "5 members | active now"}
+                    {selectedChatType === "single" ? "active now" : "5 members | active now"}
                   </p>
                 </div>
               </div>
@@ -335,7 +335,7 @@ const ChatApp = () => {
             {/* User Avatar */}
             <div className="flex flex-col items-center text-center mb-6">
               <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center text-3xl text-white font-bold">
-                {chatType.charAt(0).toUpperCase()}
+                {selectedChatType.charAt(0).toUpperCase()}
               </div>
               <h3 className="mt-3 text-xl font-semibold text-gray-800">John Doe</h3>
               <p className="text-sm text-gray-500">Online</p>

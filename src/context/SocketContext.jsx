@@ -5,14 +5,10 @@ import { useLocation } from "react-router-dom";
 import {
   clearChatState,
   onlineStatusData,
-  setConversationList,
-  setFilesList,
-  setLinksList,
-  setSelectChat,
-  setSelectedChatMessages,
+  setGroupConversationList,
   setSelectedUpdateChatMessages,
+  setSingleConversationList,
   setupdateMessageValue,
-  setupdateOneMessage,
   updateFilesList,
   updatelinksList
 } from "../Redux/features/Chat/chatSlice";
@@ -49,6 +45,9 @@ export const SocketProvider = ({ children }) => {
         socket.current.on("connect", () => {
           console.log("Connected to socket server");
           socket.current.emit("registerUser", profileData._id);
+          socket.current.emit("conversation", profileData._id);
+          socket.current.emit("groupConversation", profileData._id);
+
         });
       } else {
         socket.current.on("disconnect", () => {
@@ -80,23 +79,40 @@ export const SocketProvider = ({ children }) => {
       socket.current.off("downloadFileResult");
       socket.current.off("getFilesResults");
 
-      // socket.current.on("conversationCreateResult", (userData) => {
-      //   if (userData) {
-      //     dispatch(setSelectChat(userData));
-      //     socket.current.emit("conversation", profileData._id);
-      //   }
-      // });
-
-      socket.current.on("groupConversationResults", (conversationList) => {
-      });
-
-      socket.current.on("conversationResults", (conversationList) => {
-        if (conversationList?.value?.length > 0) {
-          dispatch(setConversationList(conversationList?.value));
-        } else {
-          dispatch(setConversationList([]));
+      socket.current.on("conversationCreateResult", (userData) => {
+        debugger
+        if (userData) {
+          dispatch(setSelectChat(userData));
+          socket.current.emit("conversation", profileData._id);
         }
       });
+
+      socket.current.on("groupConversationResults", (groupConversation) => {
+        if (groupConversation?.value?.length > 0) {
+          dispatch(setGroupConversationList(groupConversation?.value));
+        } else {
+          dispatch(setGroupConversationList([]));
+        }
+      });
+
+      socket.current.on("conversationResults", (singleConversation) => {
+        if (singleConversation?.value?.length > 0) {
+          dispatch(setSingleConversationList(singleConversation?.value));
+        } else {
+          dispatch(setSingleConversationList([]));
+        }
+      });
+
+      // socket.current.on("groupConversationResults", (conversationList) => {
+      // });
+
+      // socket.current.on("conversationResults", (conversationList) => {
+      //   if (conversationList?.value?.length > 0) {
+      //     dispatch(setConversationList(conversationList?.value));
+      //   } else {
+      //     dispatch(setConversationList([]));
+      //   }
+      // });
 
       socket.current.on("receiveMessage", (messages) => {
         socket.current.emit("conversation", profileData._id);
@@ -155,7 +171,7 @@ export const SocketProvider = ({ children }) => {
       // })
 
     }
-  }, [selectedUserDetails, profileData, dispatch]);
+  }, []);
 
   const fetchMessages = async (pageNum, contact) => {
     setMessageLoading(true);

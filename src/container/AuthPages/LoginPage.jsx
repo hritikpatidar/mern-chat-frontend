@@ -18,7 +18,6 @@ export default function LoginPage() {
   const [loginFormDetails, setLoginFormDetails] = useState({
     email: "",
     password: "",
-    role: "Seller"
   });
 
   const [errorMessages, setErrorMessages] = useState({});
@@ -60,16 +59,17 @@ export default function LoginPage() {
       const response = await dispatch(loginFormData(loginFormDetails));
       if (response?.payload?.status === true) {
         const decodedToken = jwtDecode(response?.payload?.token);
-        setItemLocalStorage("userRole", decodedToken?.role);
+        setItemLocalStorage("userRole", "User");
         toast.success(response?.payload?.message);
         setItemLocalStorage("token", response?.payload?.token);
         await dispatch(profileDetails());
-        if (decodedToken?.sellingType) navigate("/");
-        else navigate("/services", { state: { sellerId: decodedToken?.user_id } })
+        navigate("/");
       } else {
         toast.error(
           response.payload?.message || "Email or Password Does Not Exist"
         );
+        setItemLocalStorage("token","nasidbclkzkjdnadsscknc");
+        navigate("/");
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");

@@ -9,10 +9,6 @@ export const SignupService = (payload) => {
     return httpServices.post(`${getUrl()}/signup`, payload);
 }
 
-export const updateSellingType = (payload) => {
-    return httpServices.post(`${getUrl()}/update-selling-type`, payload);
-}
-
 export const profileDetailsService = () => {
     return httpServices.get(`${getUrl()}/profile`);
 }
@@ -35,14 +31,6 @@ export const handleSendOtpService = (payload) => {
 
 export const handleVerifyOtpService = (payload) => {
     return httpServices.post(`${getUrl()}/verify-otp`, payload)
-}
-
-export const contectUsService = (payload) => {
-    return httpServices.post(`${getUrl()}/contect-us`, payload)
-}
-
-export const getBusinessCodeListService = (payload) => {
-    return httpServices.get(`${getUrl()}/business-type-list`, payload)
 }
 
 

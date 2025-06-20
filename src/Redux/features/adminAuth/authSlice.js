@@ -1,27 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getItemLocalStorage } from "../../../Utils/browserServices";
-import { getBusinessCodeListService, LoginService, profileDetailsService, SignupService } from "../../../Services/AdminServices";
+import { LoginService, profileDetailsService, SignupService } from "../../../Services/AdminServices";
 
 
 const initialState = {
   loading: false,
   token: "",
-  businessCodeList: [],
   profileDetails: {},
   notificationList: [],
   error: "",
 };
-
-
- 
-
-export const getBusinessCodeList = createAsyncThunk(
-  "auth/businessCodeList",
-  async (payload) => {
-    const response = await getBusinessCodeListService(payload)
-    return response.data
-  }
-)
 
 
 export const signupForm = createAsyncThunk(
@@ -64,27 +52,12 @@ const AuthSlice = createSlice({
     logoutSuccess: (state) => {
       state.loading = false;
       state.token = "";
-      state.businessCodeList = [];
       state.profileDetails = {}
       state.notificationList = [];
       state.error = "";
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getBusinessCodeList.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(getBusinessCodeList.fulfilled, (state, action) => {
-      state.loading = false;
-      state.businessCodeList = action.payload?.data || {};
-      state.error = "";
-    });
-    builder.addCase(getBusinessCodeList.rejected, (state, action) => {
-      state.loading = false;
-      state.businessCodeList = {};
-      state.error = action.error.message;
-    });
-    //------------------------------------------------------------------
     builder.addCase(signupForm.pending, (state) => {
       state.loading = true;
     });

@@ -1,287 +1,269 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import for navigation
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
-import { Search, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { clearChatState, getConversation, getUserList, setFilesList, setLinksList, setSelectChat, setSelectedChatMessages, setSelectedChatMessagesClear } from "../../Redux/features/Chat/chatSlice";
-import { Spinner } from "@material-tailwind/react";
+import { clearChatState } from "../../Redux/features/Chat/chatSlice";
 import { useSocket } from "../../context/SocketContext";
-import moment from "moment";
+import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Search, Settings, SunMoon, User, X } from 'lucide-react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserServices";
 
-const ChatSidebar = ({ onSelectContact, messagesContainerRef }) => {
+const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const { socket, userListModal, setUserListModal, fetchMessages, setHasMore, setPage } = useSocket();
 
-  const [isListLoading, setIsListLoading] = useState(false);
-  const userLists = useSelector((state) => state?.ChatDataSlice?.userList);
+  // const [isListLoading, setIsListLoading] = useState(false);
+  // const userLists = useSelector((state) => state?.ChatDataSlice?.userList);
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
-  const conversationList = useSelector((state) => state?.ChatDataSlice?.conversationList);
-  const selectedUserDetails = useSelector((state) => state?.ChatDataSlice?.selectChatUSer);
-  const [searchValue, setSearchValue] = useState("")
-  const [searchConversationUSer, setSearchConversationUSer] = useState("")
-  const filterData = userLists?.filter((resource) => {
-    const fullName = resource?.full_name?.toLowerCase() || "";
-    const email = resource?.email?.toLowerCase() || "";
-    const search = searchValue.toLowerCase();
+  // const conversationList = useSelector((state) => state?.ChatDataSlice?.conversationList);
+  // const selectedUserDetails = useSelector((state) => state?.ChatDataSlice?.selectChatUSer);
+  // const [searchValue, setSearchValue] = useState("")
+  // const [searchConversationUSer, setSearchConversationUSer] = useState("")
+  // const filterData = userLists?.filter((resource) => {
+  //   const fullName = resource?.full_name?.toLowerCase() || "";
+  //   const email = resource?.email?.toLowerCase() || "";
+  //   const search = searchValue.toLowerCase();
 
-    return fullName.includes(search) || email.includes(search);
-  });
+  //   return fullName.includes(search) || email.includes(search);
+  // });
+  const [chatType, setChatType] = useState("single")
+  const [isUserListOpen, setIsUserListOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-
-  const tabList = profileData?.role === "Admin"
-    ? [t("sell_er"), t("cus_tomer")]
-    : [t("Admin"), t("Customer")];
-  const [activeTab, setActiveTab] = useState(profileData?.role === "Admin" ? "Seller" : "Admin");
-
-  const adminUsers = conversationList.filter(user => user?.receiver?.role === "Admin");
-  const otherUsers = conversationList.filter(user => user?.receiver?.role !== "Admin");
-  const lastAdminIndex = adminUsers.length - 1;
-
-  const sortedUsers = [...adminUsers, ...otherUsers];
-  const conversationFilterData = sortedUsers?.filter((resource) => {
-    const fullName = `${resource?.receiver?.full_name.toLowerCase()}`;
-    return fullName.includes(searchConversationUSer.toLowerCase());
-  });
-
-  useEffect(() => {
-    fetchConversation()
-  }, [])
-
-  const fetchConversation = async () => {
-    try {
-      const response = await dispatch(getConversation())
-      if (response?.payload?.status === false) {
-        dispatch(setSelectChat(null))
+  const handleSignOut = () => {
+    setLoading(true);
+    setTimeout(() => {
+      const fcmToken = getItemLocalStorage("fcm_token");
+      clearLocalStorage();
+      if (fcmToken) {
+        setItemLocalStorage("fcm_token", fcmToken);
       }
-    } catch (error) {
-      console.error("error", error)
-    }
-  }
-
-  const handleBackClick = () => {
-    dispatch(clearChatState())
-    navigate("/");
+      dispatch({ type: "RESET" });
+      navigate("/login");
+    }, 2000);
   };
 
-  const handleUserModal = async (tab) => {
-    setActiveTab(tab)
-    setUserListModal(true);
-    setIsListLoading(true);
-    try {
-      const response = await dispatch(getUserList(tab));
-    } catch (error) {
-      console.error("Error loading users list", error);
-    } finally {
-      setIsListLoading(false);
-    }
-  }
-
-  const handleSelectConversation = (contact) => {
-    const container = messagesContainerRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
-    dispatch(setFilesList([]))
-    dispatch(setLinksList([]))
-    dispatch(setSelectChat(contact))
-    dispatch(setSelectedChatMessagesClear([]))
-    setHasMore(true)
-    setPage(1);
-    fetchMessages(1, contact)
-  }
 
   return (
     <>
-      <div className="w-1/4 bg-gray-100  shadow-lg border-r overflow-hidden">
-        <div className="p-5 border-b flex items-center justify-between">
-          <button onClick={handleBackClick} className="text-gray-700 hover:text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h2 className="text-2xl font-bold"> {t("chat")}</h2>
-          <button className="text-gray-700 hover:text-gray-800" onClick={() => handleUserModal(activeTab)}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-        </div>
+      <div
+        className={`fixed z-20 h-full w-72 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+              ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-96`}
+      >
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
+          <span>RN Events</span>
 
-        {/* Search Input */}
-        <div className="px-4 py-2 border-b">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder={t("search_conversations")}
-              value={searchConversationUSer}
-              onChange={(e) => { setSearchConversationUSer(e.target.value) }}
-              className="w-full border border-gray-500 rounded-lg px-4 py-2 pr-10 outline-none text-gray-700 focus:ring-0"
-            />
-            <span className="absolute inset-y-0 right-3 flex items-center text-gray-500">
-              {searchConversationUSer ?
-                <X onClick={() => setSearchConversationUSer("")} className="w-5 h-5 cursor-pointer text-gray-700 hover:text-gray-800" />
-                :
-                <Search className="w-5 h-5 text-gray-700" />
-              }
-            </span>
+          <div className="flex items-center gap-2">
+            <button
+              className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
+              onClick={() => setIsUserListOpen(!isUserListOpen)}
+            >
+              <MessageSquarePlus className="w-5 h-5" />
+            </button>
+            <button
+              className="sm:hidden text-xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
+              onClick={() => setShowSidebar(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <Menu as="div" className="relative inline-block text-left">
+              <div>
+                <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                  <EllipsisVertical className="w-5 h-5" aria-hidden="true" />
+                </MenuButton>
+              </div>
+
+              <MenuItems
+                transition
+                className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+              >
+                {/* Profile Section */}
+                <button
+                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  onClick={() => console.log("Profile clicked")}
+                >
+                  <User className="w-5 h-5 text-gray-700" />
+                  Profile
+                </button>
+                <button
+                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  onClick={() => console.log("Account Settings clicked")}
+                >
+                  <Settings className="w-5 h-5 text-gray-700" />
+                  Account Settings
+                </button>
+                <button
+                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  onClick={() => console.log("Theme Toggle clicked")}
+                >
+                  <SunMoon className="w-5 h-5 text-gray-700" />
+                  Theme: Light/Dark
+                </button>
+                <button
+                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  onClick={() => console.log("Notifications clicked")}
+                >
+                  <Bell className="w-5 h-5 text-gray-700" />
+                  Notifications
+                </button>
+                <button
+                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  onClick={() => console.log("Support clicked")}
+                >
+                  <LifeBuoy className="w-5 h-5 text-gray-700" />
+                  Support
+                </button>
+
+                {/* Logout */}
+                <button
+                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  onClick={() => setIsLogoutModalOpen(true)}
+                >
+                  <LogOut className="w-5 h-5 text-red-600" />
+                  <span className="text-red-600 font-medium">Logout</span>
+                </button>
+              </MenuItems>
+            </Menu>
           </div>
+        </h3>
+        {/* Search */}
+        <div className="mb-4 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search or start a new chat"
+            className="w-full px-3 py-2 pl-10 rounded-md border border-gray-300 bg-white focus:outline-none text-sm text-gray-800"
+          />
         </div>
 
-        {/* Scrollable List */}
-        <ul className="h-[calc(100vh-130px)] overflow-y-auto ">
-          {conversationFilterData.length > 0 ? (
-            conversationFilterData.map((contact, index) => {
-              const isYour = contact?.lastMessageDetails?.isSenderId === profileData?._id;
-              return (
-                <>
-                  <li
-                    key={index}
-                    onClick={() => handleSelectConversation(contact)}
-                    className={`w-full p-4 border-b ${selectedUserDetails?._id === contact?._id && "bg-[#f0ede8]"
-                      } hover:bg-[#f0ede8] cursor-pointer flex items-center gap-3 justify-between`}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      {contact?.receiver?.profile ? (
-                        <img
-                          src={contact?.receiver?.profile}
-                          alt={contact?.receiver?.full_name}
-                          className="w-12 h-12 rounded-full object-cover border"
-                        />
-                      ) : (
-                        <div className="w-14 h-12 rounded-full flex items-center justify-center bg-gray-300 text-white font-bold text-lg border">
-                          {contact?.receiver?.full_name?.charAt(0)?.toUpperCase()}
-                        </div>
-                      )}
-                      <div className="w-full">
-                        <div className="flex items-center justify-between w-full">
-                          <span className="text-gray-900 font-semibold">{contact?.receiver?.full_name}</span>
-                          <span className="text-gray-500 text-xs time">{moment(contact?.lastMessageDetails?.timestamp).format(t("hh:mm A"))}</span>
-                        </div>
-                        <div className="flex items-center justify-between w-full">
-                          <p className="text-gray-600 text-sm truncate">
-                            {isYour ? t("you") + ": " : ""}
-                            {contact?.lastMessageDetails?.messageType === "file"
-                              ? "File"
-                              : contact?.lastMessageDetails?.message?.length > 20
-                                ? contact?.lastMessageDetails?.message.substring(0, 20) + "..."
-                                : contact?.lastMessageDetails?.message || t("start_chat")}
-                          </p>
-                          {contact?.lastMessageDetails?.unReadMessages > 0 && (
-                            <span className="bg-gray-400 text-black-400 text-xs font-bold px-2 py-1 rounded-full">
-                              {contact?.lastMessageDetails?.unReadMessages}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  {index === lastAdminIndex && adminUsers.length > 0 && <hr className="border-t-2 border-gray-300 my-2" />}
-                </>
-              );
-            })
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-gray-500 p-4 text-center w-full">{t("no_contacts_available")}</p>
-            </div>
-          )}
+        {/* Tabs: Group / Single */}
+        <div className="flex mb-4 border border-gray-300 rounded-md overflow-hidden">
+          <button
+            className={`flex-1 py-2 text-sm font-medium ${chatType === "single" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
+            onClick={() => setChatType("single")}
+          >
+            Single
+          </button>
+          <button
+            className={`flex-1 py-2 text-sm font-medium ${chatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
+            onClick={() => setChatType("group")}
+          >
+            Group
+          </button>
+        </div>
+
+        {/* Recent Chats */}
+        <ul className="space-y-2 overflow-y-auto flex-1">
+          {(chatType === "single" ? ["John Doe"] : ["College Friends"]).map((name, i) => (
+            <li
+              key={i}
+              className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
+            >
+              {/* Profile circle (initials) */}
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
+                {name
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")
+                  .toUpperCase()}
+              </div>
+
+              {/* Name and message */}
+              <div className="flex-1">
+                <p className="font-medium text-gray-800">{name}</p>
+                <p className="text-xs text-gray-600">This theme is awesome!</p>
+              </div>
+
+              {/* Time */}
+              <span className="text-xs text-gray-500">2:06 min</span>
+            </li>
+          ))}
         </ul>
       </div>
 
-      {
-        userListModal && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      <div
+        className={`fixed z-20 h-full w-72 sm:w-96 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+                ${isUserListOpen ? "translate-x-0" : "-translate-x-100"}`}
+      >
+        {/* Header */}
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
+          <button
+            className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
+            onClick={() => setIsUserListOpen(false)}
           >
-            <motion.div
-              className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full"
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+            <MoveLeft className="w-5 h-5" />
+          </button>
+        </h3>
+
+        {/* Search */}
+        <div className="mb-4 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search or start a new chat"
+            className="w-full px-3 py-2 pl-10 rounded-md border border-gray-300 bg-white focus:outline-none text-sm text-gray-800"
+          />
+        </div>
+
+        <h3 className="text-gray-500 font-bold ml-2 mb-3">Connect with us</h3>
+
+        {/* User List */}
+        <ul className="space-y-2 overflow-y-auto flex-1">
+          {["John Doe", "Ritik Patidar"].map((name, i) => (
+            <li
+              key={i}
+              className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
             >
-              {/* Header with Close Button */}
-              <div className="flex justify-between items-center mb-4">
-                {/* <h2 className="text-xl font-bold text-gray-700"> {t("user_list")} </h2> */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder={t("search_users")}
-                    onChange={(e) => { setSearchValue(e.target.value) }}
-                    value={searchValue}
-                    className="border border-gray-500 rounded-lg px-3 py-2 pr-10 outline-none text-gray-700 focus:outline-none focus:ring-0"
-                  />
-                  <span className="absolute inset-y-0 right-3 flex items-center text-gray-500 ">
-                    {searchValue ?
-                      <X onClick={() => setSearchValue("")} className="w-5 h-5 cursor-pointer text-gray-700 hover:text-gray-800" />
-                      :
-                      <Search className="w-5 h-5 text-gray-700" />
-                    }
-                  </span>
-                </div>
-                <button onClick={() => setUserListModal(false)} className="text-gray-700 hover:text-gray-800">
-                  <X className="w-6 h-6" />
-                </button>
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
+                {name
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")
+                  .toUpperCase()}
               </div>
+              <div className="flex-1">
+                <p className="font-medium text-gray-800">{name}</p>
+                <p className="text-xs text-gray-600">This theme is awesome!</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-              {/* Tabs Section */}
-              <div className="flex border-b">
-                {tabList.map((tab) => (
-                  <button
-                    key={tab}
-                    className={`flex-1 py-2 text-center text-sm font-semibold ${activeTab === tab ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-600"
-                      }`}
-                    onClick={() => handleUserModal(tab)}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 sm:px-0">
+          <div className="bg-gray-100 border border-gray-300 shadow-2xl rounded-xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 transition-all duration-300">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+              Are you sure you want to logout?
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-6">
+              Your session will end immediately.
+            </p>
 
-              {/* Scrollable User List */}
-              <div className="mt-4 max-h-60 min-h-60 overflow-y-auto">
-                {isListLoading ?
-                  <>
-                    <div className="flex  justify-center items-center">
-                      <Spinner className="h-8 w-8 text-secondary/50" />
-                    </div>
-                  </>
-                  :
-                  filterData.length > 0 ? (
-                    filterData.map((user, index) => (
-                      <div key={index} className="flex justify-start items-center p-2 border-b cursor-pointer"
-                        onClick={() => onSelectContact(user)}
-                      >
-                        {user.profile ? (
-                          <img
-                            src={user.profile}
-                            alt={user.full_name}
-                            className="w-10 h-10 rounded-full object-cover border"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-300 text-white font-bold text-lg border">
-                            {user.full_name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="ml-3">
-                          <p className="font-semibold">{user.full_name}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-500">{t("no_users_in_this")} {activeTab.toLowerCase()}.</p>
-                  )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )
-      }
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+              <button
+                onClick={() => setIsLogoutModalOpen(false)}
+                className="w-full sm:w-auto px-4 py-2 rounded-md border border-gray-400 text-gray-800 hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignOut}
+                disabled={loading}
+                className={`w-full sm:w-auto px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition ${loading ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
+              >
+                {loading ? "Logging out..." : "Logout"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

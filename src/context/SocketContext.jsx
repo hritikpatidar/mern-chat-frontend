@@ -25,7 +25,6 @@ export const useSocket = () => {
 
 export const SocketProvider = ({ children }) => {
   const socket = useRef(null);
-  const [isSocketConnected, setIsSocketConnected] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
   const [pageSize, setPageSize] = useState(20);
@@ -46,19 +45,16 @@ export const SocketProvider = ({ children }) => {
         transports: ["websocket", "polling"],
       });
 
-      if (location?.pathname === "/chat" || location?.pathname === "/admin/chat") {
+      if (location?.pathname === "/") {
         socket.current.on("connect", () => {
           console.log("Connected to socket server");
           socket.current.emit("registerUser", profileData._id);
-          setIsSocketConnected(true);
         });
       } else {
         socket.current.on("disconnect", () => {
           console.log("Socket disconnected");
-          setIsSocketConnected(false);
         });
       }
-      // Cleanup on Unmount
       return () => {
         socket.current.disconnect();
         socket.current = null;
@@ -77,17 +73,21 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (socket.current) {
       socket.current.off("conversationCreateResult");
+      socket.current.off("groupConversationResults");
       socket.current.off("conversationResults");
       socket.current.off("receiveMessage");
       socket.current.off("getMessageResults");
       socket.current.off("downloadFileResult");
       socket.current.off("getFilesResults");
 
-      socket.current.on("conversationCreateResult", (userData) => {
-        if (userData) {
-          dispatch(setSelectChat(userData));
-          socket.current.emit("conversation", profileData._id);
-        }
+      // socket.current.on("conversationCreateResult", (userData) => {
+      //   if (userData) {
+      //     dispatch(setSelectChat(userData));
+      //     socket.current.emit("conversation", profileData._id);
+      //   }
+      // });
+
+      socket.current.on("groupConversationResults", (conversationList) => {
       });
 
       socket.current.on("conversationResults", (conversationList) => {
@@ -120,39 +120,39 @@ export const SocketProvider = ({ children }) => {
         if (messages?.messageType === "link") dispatch(updatelinksList(messages))
       });
 
-      socket.current.on("getMessageResults", (messages) => {
-        if (messages.length > 0) {
-          dispatch(setSelectedChatMessages(messages));
-          if (messages.length < pageSize) setHasMore(false)
-        } else if (messages?.length === 0) {
-          setHasMore(false)
-        }
-        setMessageLoading(false)
-      });
+      // socket.current.on("getMessageResults", (messages) => {
+      //   if (messages.length > 0) {
+      //     dispatch(setSelectedChatMessages(messages));
+      //     if (messages.length < pageSize) setHasMore(false)
+      //   } else if (messages?.length === 0) {
+      //     setHasMore(false)
+      //   }
+      //   setMessageLoading(false)
+      // });
 
       socket.current.on("updateUserStatus", (data) => {
         dispatch(onlineStatusData(data));
       });
 
-      socket.current.on("downloadFileResult", (MessageData) => {
-        try {
-          if (!MessageData?.message?._id) return;
-          dispatch(setupdateOneMessage(MessageData.message));
-        } catch (error) {
+      // socket.current.on("downloadFileResult", (MessageData) => {
+      //   try {
+      //     if (!MessageData?.message?._id) return;
+      //     dispatch(setupdateOneMessage(MessageData.message));
+      //   } catch (error) {
 
-        }
-      })
+      //   }
+      // })
 
-      socket.current.on("getFilesResults", (allFiles, allLinks) => {
-        try {
-          if (allFiles?.length > 0) dispatch(setFilesList(allFiles))
-          else dispatch(setFilesList(allFiles))
+      // socket.current.on("getFilesResults", (allFiles, allLinks) => {
+      //   try {
+      //     if (allFiles?.length > 0) dispatch(setFilesList(allFiles))
+      //     else dispatch(setFilesList(allFiles))
 
-          if (allLinks?.length > 0) dispatch(setLinksList(allLinks))
-        } catch (error) {
+      //     if (allLinks?.length > 0) dispatch(setLinksList(allLinks))
+      //   } catch (error) {
 
-        }
-      })
+      //   }
+      // })
 
     }
   }, [selectedUserDetails, profileData, dispatch]);
@@ -176,7 +176,6 @@ export const SocketProvider = ({ children }) => {
     <SocketContext.Provider
       value={{
         socket: socket,
-        isSocketConnected,
         userListModal,
         setUserListModal,
         fetchMessages,

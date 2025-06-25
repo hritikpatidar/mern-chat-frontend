@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import for navigation
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { clearChatState, setSelectedChatType } from "../../Redux/features/Chat/chatSlice";
+import { clearChatState, setSelectedChatType, setSelectUser } from "../../Redux/features/Chat/chatSlice";
 import { useSocket } from "../../context/SocketContext";
 import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Search, Settings, SunMoon, User, X } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
@@ -165,10 +165,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
         {/* Recent Chats */}
         <ul className="space-y-2 overflow-y-auto flex-1">
-          {(selectedChatType === "single" ? singleConversationList : groupConversationList).map((cv, i) => {
+          {(selectedChatType === "single" ? singleConversationList : groupConversationList)?.map((cv, i) => {
+            const data = cv.members.find(item => item._id !== profileData?._id)
             let user = {}
             if (selectedChatType === "single") {
-              const data = cv.members.find(item => item._id !== profileData?._id)
               user.senderId = cv?.lastMessageDetails?.isSenderId
               user.name = data?.name
               user.profile = dummyImage
@@ -183,11 +183,11 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               user.messageType = cv?.lastMessageDetails?.messageType
               user.time = cv?.lastMessageDetails?.timestamp
             }
-            console.log("user", user)
             return (
               <li
                 key={i}
                 className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
+                onClick={() => dispatch(setSelectUser(cv))}
               >
                 {/* Profile circle (initials) */}
                 <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">

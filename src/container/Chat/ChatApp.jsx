@@ -26,7 +26,7 @@ const ChatApp = () => {
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const {  selectedChatType } = useSelector((state) => state?.ChatDataSlice);
-debugger
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim()) {
@@ -60,30 +60,6 @@ debugger
     }
   };
 
-  // useEffect(() => {
-  //   debugger
-  //   socket.current.emit("groupConversation", "681f41c31db558fb452cd754");
-  //   socket.current.emit("conversation", "681f41c31db558fb452cd754");
-  //   socket.current.on('receiveMessage', (msg) => {
-  //     setMessages((prev) => [...prev, msg]);
-
-  //   });
-
-  //   socket.current.on("groupConversationResults", (conversationList) => {
-  //     debugger
-  //   });
-
-  //   socket.current.on("conversationResults", (conversationList) => {
-  //   });
-
-  //   socket.current.on("updateUserStatus", (data) => {
-  //   });
-
-  //   return () => {
-  //     socket.off('receiveMessage');
-  //   };
-  // }, []);
-
   const handleEmojiClick = (emojiObject) => {
     setMessage((prevText) => prevText + emojiObject.emoji);
   };
@@ -100,8 +76,6 @@ debugger
       console.log("Selected file:", file);
     }
   };
-
-console.log("selectedChatType",selectedChatType)
 
   return (
     <div className="flex h-screen font-sans bg-gray-100 ">

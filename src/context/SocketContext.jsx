@@ -80,7 +80,6 @@ export const SocketProvider = ({ children }) => {
       socket.current.off("getFilesResults");
 
       socket.current.on("conversationCreateResult", (userData) => {
-        debugger
         if (userData) {
           dispatch(setSelectChat(userData));
           socket.current.emit("conversation", profileData._id);

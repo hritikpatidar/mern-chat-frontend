@@ -62,7 +62,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
     <>
       <div
         className={`fixed z-20 h-full w-72 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
-              ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-96`}
+              ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-48 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
           <span>RN Events</span>

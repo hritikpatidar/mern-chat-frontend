@@ -11,6 +11,7 @@ const initialState = {
   selectedUser: null, // selectChatUSer ke liye
   ChatMessages: [],
   onlineStatus: [],
+  isTyping: false,
   isUploading: false,
   isDownloading: false,
   fileUploadProgress: 0,
@@ -91,6 +92,10 @@ const chatSlice = createSlice({
     },
     setChatMessagesClear: (state, action) => {
       state.ChatMessages = action.payload
+    },
+
+    setIsTyping: (state, action) => {
+      state.isTyping = action.payload
     },
     setupdateMessageValue: (state, action) => {
       if (!Array.isArray(action.payload)) {
@@ -215,6 +220,7 @@ export const {
   closeChat,
   addMessage,
   onlineStatusData,
+  setIsTyping,
   setIsUserDetails,
   setFilesList,
   updateFilesList,

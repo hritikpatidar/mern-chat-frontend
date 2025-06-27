@@ -33,8 +33,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const fileInputRef = useRef(null);
   const messagesContainerRef = useRef(null)
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
-  const { selectedChatType, selectedUser, ChatMessages, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
-
+  const { isTyping, selectedUser, ChatMessages, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
   const [isUserAtBottom, setIsUserAtBottom] = useState(false)
   const [message, setMessage] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
@@ -257,13 +256,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   </h2>
                   <p className="text-sm text-green-600">
                     {selectedUser?.conversationType === "single" ?
-                      onlineStatus?.onlineUsers?.includes(userDetails?._id) ? (
-                        "Online"
-                      ) : (
-                        <span className="text-sm text-gray-500 font-normal">
-                          {onlineStatus?.lastSeen?.[userDetails?._id] || "Offline"}
-                        </span>
-                      )
+                      isTyping ? "Typing..."
+                        :
+                        onlineStatus?.onlineUsers?.includes(userDetails?._id) ? (
+                          "Online"
+                        ) : (
+                          <span className="text-sm text-gray-500 font-normal">
+                            {onlineStatus?.lastSeen?.[userDetails?._id] || "Offline"}
+                          </span>
+                        )
                       :
                       `${selectedUser?.members.filter(user =>
                         onlineStatus.onlineUsers.includes(user?._id)
@@ -275,8 +276,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 px-3">
-                <div className="hidden sm:flex items-center gap-3">
+              <div className="flex items-center gap-2 px-1 -mr-[10px]">
+                <div className="hidden xl:flex items-center gap-3">
                   <button className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                     <Phone className="w-5 h-5" />
                   </button>
@@ -284,14 +285,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     <Video className="w-5 h-5" />
                   </button>
                   <button
-                    className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                    className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer "
                     onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                   >
                     <User className="w-5 h-5" />
                   </button>
                 </div>
 
-                <Menu as="div" className="relative inline-block text-left">
+                <Menu as="div" className="relative inline-block text-left ">
                   <div>
                     <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                       <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
@@ -302,6 +303,28 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     transition
                     className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                   >
+                    <button
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      onClick={() => console.log("Archive clicked")}
+                    >
+                      <Phone className="w-5 h-5" />
+                      Voice Call
+                    </button>
+                    <button
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      onClick={() => console.log("Archive clicked")}
+                    >
+                      <Video className="w-5 h-5" />
+                      Video Call
+                    </button>
+                    <button
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      onClick={() => console.log("Archive clicked")}
+                    >
+                      <User className="w-5 h-5" />
+                      View details
+                    </button>
+
                     {/* New Options */}
                     <button
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
@@ -510,7 +533,16 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
               <input
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => {
+                  let typingTimeout = null;
+                  setMessage(e.target.value)
+                  socket.current.emit('typing', selectedUser?._id, profileData?._id);
+
+                  clearTimeout(typingTimeout);
+                  typingTimeout = setTimeout(() => {
+                    socket.current.emit('stopTyping', selectedUser?._id, profileData?._id);
+                  }, 5000);
+                }}
                 placeholder="Type a message..."
                 className="flex-1 px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
               />

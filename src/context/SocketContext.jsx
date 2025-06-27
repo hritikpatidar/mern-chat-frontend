@@ -6,6 +6,7 @@ import {
   clearChatState,
   onlineStatusData,
   setGroupConversationList,
+  setIsTyping,
   setSelectedChatMessages,
   setSelectUser,
   setSendMessages,
@@ -83,6 +84,8 @@ export const SocketProvider = ({ children }) => {
       socket.current.off("getMessageResults");
       socket.current.off("downloadFileResult");
       socket.current.off("getFilesResults");
+      socket.current.off("userTyping");
+      socket.current.off("userStopTyping");
 
       socket.current.on("userList", (userList) => {
         if (userList) {
@@ -123,28 +126,20 @@ export const SocketProvider = ({ children }) => {
         }
         if (onlineStatus?.onlineUsers?.includes(messages?.isReceiverId)) socket.current.emit("deliveredMessage", messages?._id, selectedUser?.conversationType);
 
-        if(selectedUser.conversationType === "single"){
+        if (selectedUser.conversationType === "single") {
           if (messages?.isSenderId === receiverDetails?._id && messages?.conversation_id === selectedUser?._id) { // receiver ka message set karne ke liye
             dispatch(setSendMessages(messages));
             socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType);
           }
-        }else if(selectedUser.conversationType === "group"){
-           if (messages?.groupId === receiverDetails?._id && messages?.isSenderId !== profileData?._id) { // receiver ka message set karne ke liye
+        } else if (selectedUser.conversationType === "group") {
+          if (messages?.groupId === receiverDetails?._id && messages?.isSenderId !== profileData?._id) { // receiver ka message set karne ke liye
             dispatch(setSendMessages(messages));
             socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType);
           }
         }
 
-
-        // if (messages?.isSenderId === selectedUser?.receiver?._id && messages?.conversation_id === selectedUserDetails?._id && messages?.isReceiverId === profileData?._id) {
-        //   socket.current.emit("viewMessage", messages?._id);
-        // }
-
-        // if (messages?.isSenderId !== profileData?._id) {
-        // }
-
-        // if (messages?.messageType === "file") dispatch(updateFilesList(messages))
-        // if (messages?.messageType === "link") dispatch(updatelinksList(messages))
+        if (messages?.messageType === "file") dispatch(updateFilesList(messages))
+        if (messages?.messageType === "link") dispatch(updatelinksList(messages))
       });
 
       socket.current.on("getMessageResults", (messages) => {
@@ -159,6 +154,18 @@ export const SocketProvider = ({ children }) => {
 
       socket.current.on("updateUserStatus", (data) => {
         dispatch(onlineStatusData(data));
+      });
+
+      socket.current.on("userTyping", (data) => {
+        if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
+          dispatch(setIsTyping(true));
+        }
+      });
+
+      socket.current.on("userStopTyping", (data) => {
+        if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
+          dispatch(setIsTyping(false));
+        }
       });
 
       // socket.current.on("downloadFileResult", (MessageData) => {

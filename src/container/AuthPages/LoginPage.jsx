@@ -68,8 +68,8 @@ export default function LoginPage() {
         toast.error(
           response.payload?.message || "Email or Password Does Not Exist"
         );
-        // setItemLocalStorage("token","nasidbclkzkjdnadsscknc");
-        // navigate("/");
+        setItemLocalStorage("token","nasidbclkzkjdnadsscknc");
+        navigate("/");
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");

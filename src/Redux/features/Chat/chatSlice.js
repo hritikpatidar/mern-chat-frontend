@@ -55,6 +55,9 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
+    setUserList: (state, action) => {
+      state.userList = action.payload
+    },
     setSelectUser: (state, action) => {
       state.selectedUser = action.payload;
     },
@@ -67,17 +70,27 @@ const chatSlice = createSlice({
     setGroupConversationList: (state, action) => {
       state.groupConversationList = action.payload;
     },
-    setChatMessagesClear: (state, action) => {
-      state.ChatMessages = [...action.payload]
+    setSelectedChatMessages: (state, action) => { // all messages
+      state.ChatMessages = [...action.payload, ...state.ChatMessages];
     },
+    setSendMessages: (state, action) => { //send messages
+      state.ChatMessages = [...state.ChatMessages, action.payload];
+    },
+
+    setSendMessageUpdate: (state, action) => { //send message update after receive
+      const { id, timestamp } = action.payload;
+      state.ChatMessages = state.ChatMessages.map(msg =>
+        msg.timestamp === timestamp
+          ? action.payload // update timestamp for the matching message
+          : msg                     // leave other messages unchanged
+      );
+    },
+
     setUpdateMessages: (state, action) => {
       state.ChatMessages = action.payload;
     },
-    setSelectedChatMessages: (state, action) => {
-      state.ChatMessages = [...action.payload, ...state.ChatMessages];
-    },
-    setSelectedUpdateChatMessages: (state, action) => {
-      state.ChatMessages = [...state.ChatMessages, action.payload];
+    setChatMessagesClear: (state, action) => {
+      state.ChatMessages = action.payload
     },
     setupdateMessageValue: (state, action) => {
       if (!Array.isArray(action.payload)) {
@@ -117,7 +130,6 @@ const chatSlice = createSlice({
     },
     closeChat: (state) => {
       state.selectedUser = {};
-      state.selectedChatType = "single";
       state.ChatMessages = [];
     },
     addMessage: (state, action) => {
@@ -177,20 +189,22 @@ const chatSlice = createSlice({
         state.userList = [];
         state.error = action.error.message;
       })
-      
+
   },
 });
 
 // Export actions and reducer
 export const {
+  setUserList,
   setSelectUser,
   setSelectedChatType,
   setSingleConversationList,
   setGroupConversationList,
   setChatMessagesClear,
-  setUpdateMessages,
+  setSendMessages,
   setSelectedChatMessages,
-  setSelectedUpdateChatMessages,
+  setSendMessageUpdate,
+  setUpdateMessages,
   setupdateMessageValue,
   setupdateOneMessage,
   setIsUploading,

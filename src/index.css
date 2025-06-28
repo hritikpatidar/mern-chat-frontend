@@ -27,10 +27,6 @@ button {
   cursor: pointer;
 }
 
-.min-h-screen {
-    min-height: 95vh !important
-}
-
 ::-webkit-scrollbar {
   width: 5px !important;
   height: 6px !important;

@@ -25,8 +25,10 @@ export const SignupForm = ({ handleSubmit, loading }) => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4">
-            <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-300">
+        // <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4">
+        //     <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-300">
+        <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-6">
+            <div className="bg-white w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-md border border-gray-300 max-h-[calc(100vh-3rem)] overflow-y-auto">
                 <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
                     Create Account 👤
                 </h2>

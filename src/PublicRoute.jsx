@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { isLogin } from './Utils/Auth'
 import { useEffect } from 'react';
 
-export const PublicRoute = () => {
+export const PublicRoute = () => { 
   const adminLogin = isLogin()
   const { pathname } = useLocation();
 

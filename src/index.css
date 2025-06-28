@@ -41,13 +41,15 @@ button {
 }
 
 
-/* Target Chrome/Safari on Android */
+/* Tailwind-compatible overrides */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
   position: absolute;
+  left: 0;
   right: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  opacity: 0;
   cursor: pointer;
 }

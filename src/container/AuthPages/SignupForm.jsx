@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 export const SignupForm = ({ handleSubmit, loading }) => {
     const navigate = useNavigate()
-    const dobRef = useRef(null);
     const [formDetails, setFormDetails] = useState({
         name: "",
         user_name: "",
@@ -16,11 +15,6 @@ export const SignupForm = ({ handleSubmit, loading }) => {
     });
     const [showPassword, setShowPassword] = useState(false);
 
-    const openPicker = () => {
-        if (dobRef.current && dobRef.current.showPicker) {
-            dobRef.current.showPicker();
-        }
-    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         const newData = { [name]: value }
@@ -84,20 +78,19 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                             name="phone_no"
                             value={formDetails?.phone_no}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 "
                         />
                     </div>
 
                     {/* Date of Birth */}
-                    <div className="mb-4 relative" onClick={openPicker}>
+                    <div className="mb-4 relative">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
-                            ref={dobRef}
                             type="date"
                             name="dob"
                             value={formDetails.dob}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer"
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer "
                         />
                     </div>
 
@@ -108,7 +101,7 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                             name="gender"
                             value={formDetails?.gender}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer "
                         >
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>

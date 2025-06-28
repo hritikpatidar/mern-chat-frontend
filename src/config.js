@@ -5,9 +5,8 @@ const getUrl = () => {
   const API_BASE_URLS = {
     Seller: "seller",
     Admin: "super-admin",
-    // User: "auth",
-    User: "user",
-    Guest: "user"
+    User: "auth",
+    Guest: "auth"
   };
   return API_BASE_URLS[userRole];
 };

@@ -62,7 +62,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
     <>
       <div
         className={`fixed z-20 h-full w-72 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
-              ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-48 md:w-72 xl:w-96`}
+              ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
           <span>RN Events</span>
@@ -228,7 +228,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                 {/* Time */}
                 <div className="flex flex-col items-end text-xs text-gray-500">
-                  {cv?.lastMessageDetails?.unReadMessages ?
+                  {(cv?.lastMessageDetails?.unReadMessages && cv?._id !== selectedUser?._id) ?
                     <span className="inline-block bg-gray-500 text-gray-800 rounded-full px-2 py-0.5 mb-0.5" >{formatter.format(cv?.lastMessageDetails?.unReadMessages)}</span>
                     : <></>
                   }
@@ -241,7 +241,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
       </div>
 
       <div
-        className={`fixed z-20 h-full w-72 sm:w-48 md:w-72 xl:w-96 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+        className={`fixed z-20 h-full w-72 sm:w-56 md:w-72 xl:w-96 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
                 ${isUserListOpen ? "translate-x-0" : "-translate-x-100"} `}
       >
         {/* Header */}

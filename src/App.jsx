@@ -5,6 +5,7 @@ import { PublicRoute } from './PublicRoute';
 import { PrivateRoute } from './PrivateRoute';
 import NotFound from './components/NotFound';
 import LoginPage from './container/AuthPages/LoginPage';
+import { SignupForm } from './container/AuthPages/SignupForm';
 
 export default function App() {
   return (
@@ -13,7 +14,7 @@ export default function App() {
         <Routes>
           <Route element={<PublicRoute />}>
              <Route path="/login" element={<LoginPage />} />
-              {/* <Route path="/sign-up" element={<SignInForm />} />  */}
+              <Route path="/sign-up" element={<SignupForm />} /> 
           </Route>
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<ChatApp />} />

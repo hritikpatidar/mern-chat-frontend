@@ -39,3 +39,17 @@ button {
 ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
 }
+
+
+/* Tailwind-compatible overrides */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  opacity: 0;
+  cursor: pointer;
+}

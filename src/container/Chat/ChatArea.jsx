@@ -171,6 +171,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   }, [socket, ChatMessages]);
 
+  const formatDateKey = (date) => {
+    const d = dayjs(date);
+    if (d.isSame(dayjs(), 'day')) return 'Today';
+    if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return 'Yesterday';
+    if (d.isSame(dayjs(), 'week')) return d.format('dddd'); // जैसे Monday, ..., Sunday
+    return d.format('DD/MM/YYYY');
+  };
+
+
   const groupMessagesByDate = (messages) => {
     return messages.reduce((acc, message) => {
       if (
@@ -189,11 +198,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
       }
 
-      const date = dayjs(message.createdAt).format("DD/MM/YYYY");
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(message);
+      const key = formatDateKey(message.createdAt);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(message);
       return acc;
     }, {});
   };
@@ -304,22 +311,22 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                   >
                     <button
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
                       onClick={() => console.log("Archive clicked")}
                     >
                       <Phone className="w-5 h-5" />
                       Voice Call
                     </button>
                     <button
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
                       onClick={() => console.log("Archive clicked")}
                     >
                       <Video className="w-5 h-5" />
                       Video Call
                     </button>
                     <button
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
-                      onClick={() => console.log("Archive clicked")}
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                      onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                     >
                       <User className="w-5 h-5" />
                       View details

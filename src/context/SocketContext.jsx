@@ -124,18 +124,19 @@ export const SocketProvider = ({ children }) => {
         if (messages?.isSenderId === profileData?._id) {//sender ka message set karne ke liye
           dispatch(setSendMessageUpdate(messages));
         }
-        if (onlineStatus?.onlineUsers?.includes(messages?.isReceiverId)) socket.current.emit("deliveredMessage", messages?._id, selectedUser?.conversationType);
 
         if (selectedUser.conversationType === "single") {
           if (messages?.isSenderId === receiverDetails?._id && messages?.conversation_id === selectedUser?._id) { // receiver ka message set karne ke liye
             dispatch(setSendMessages(messages));
             socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType);
           }
+          if (onlineStatus?.onlineUsers?.includes(messages?.isReceiverId)) socket.current.emit("deliveredMessage", messages?._id, selectedUser?.conversationType);
         } else if (selectedUser.conversationType === "group") {
           if (messages?.groupId === receiverDetails?._id && messages?.isSenderId !== profileData?._id) { // receiver ka message set karne ke liye
             dispatch(setSendMessages(messages));
             socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType);
           }
+          socket.current.emit("deliveredMessage", messages?._id, selectedUser?.conversationType);
         }
 
         if (messages?.messageType === "file") dispatch(updateFilesList(messages))

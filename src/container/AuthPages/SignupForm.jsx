@@ -25,8 +25,8 @@ export const SignupForm = ({ handleSubmit, loading }) => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4 ">
-            <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-300 mb-10">
+        <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4">
+            <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-300">
                 <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
                     Create Account 👤
                 </h2>

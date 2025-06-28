@@ -65,7 +65,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
-          <span>RN Events</span>
+          <span>
+            <span className='text-teal-600'>RI</span><span className='text-gray-800'>Tech</span>
+          </span>
 
           <div className="flex items-center gap-2">
             <button

@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { loginFormData, profileDetails } from "../../Redux/features/adminAuth/authSlice";
 import { setItemLocalStorage } from "../../Utils/browserServices";
 import { jwtDecode } from "jwt-decode";
+import { apple, facebook, google } from "../../assets";
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
@@ -127,6 +128,46 @@ export default function LoginPage() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+
+          {/* Divider & Social Buttons */}
+          <div className="my-6">
+            <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
+              <hr className="flex-grow border-gray-300" />
+              <span className="mx-2">or sign up with</span>
+              <hr className="flex-grow border-gray-300" />
+            </div>
+            <div className="flex flex-col space-y-3">
+              {/* Google */}
+              <button
+                type="button"
+                // onClick={handleGoogleSignup}
+                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+              >
+                <img src={google} alt="Google" className="h-5 w-5 mr-2" />
+                <span className="text-sm text-gray-700 font-medium">Sign up with Google</span>
+              </button>
+
+              {/* Apple */}
+              <button
+                type="button"
+                // onClick={handleAppleSignup}
+                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+              >
+                <img src={apple} alt="Apple" className="h-5 w-5 mr-2" />
+                <span className="text-sm text-gray-700 font-medium">Sign up with Apple</span>
+              </button>
+
+              {/* Facebook */}
+              {/* <button
+                type="button"
+                // onClick={handleFacebookSignup}
+                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+              >
+                <img src={facebook} alt="Facebook" className="h-5 w-5 mr-2" />
+                <span className="text-sm text-gray-700 font-medium">Sign up with Facebook</span>
+              </button> */}
+            </div>
+          </div>
         </form>
 
         {/* Divider */}

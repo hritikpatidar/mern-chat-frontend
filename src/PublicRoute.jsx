@@ -14,7 +14,8 @@ export const PublicRoute = () => {
     <>
       {(!adminLogin) ? (
         <>
-          <div className="flex items-center bg-gray-100 py-2 px-4">
+          {/* Fixed Transparent Header */}
+          <header className="fixed top-0 left-0 w-full bg-gray-100 md:bg-transparent py-2 px-4 z-10">
             <a
               href="/"
               className="flex items-center space-x-1 font-semibold text-gray-800 hover:text-blue-600 transition-colors"
@@ -22,7 +23,7 @@ export const PublicRoute = () => {
               <span className="text-teal-600 text-xl sm:text-xl md:text-3xl">RI</span>
               <span className="text-gray-800 text-lg sm:text-xl md:text-2xl">Tech</span>
             </a>
-          </div>
+          </header>
           <Outlet />
         </>
       ) : (
